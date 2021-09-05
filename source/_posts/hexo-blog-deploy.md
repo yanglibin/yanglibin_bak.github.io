@@ -4,7 +4,6 @@ date: 2021-09-02 07:19:43
 tags:
 - hexo
 - github action
-toc: true
 ---
 
 > Hexo 是一款基于Node.js的一个快速、简洁且高效的博客框架。Hexo 使用 Markdown（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页，你可以把生成的静态网页上传到 Web 服务器上，这里我们选用的是 GitHub 做 Web 服务器.
