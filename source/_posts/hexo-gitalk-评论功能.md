@@ -26,6 +26,7 @@ hexo 中常用的评论工具有如下几种:
 
 
 > Gitalk 是一个基于 GitHub Issue 和 Preact 开发的评论插件。
+<!-- more -->
 
 [gitalk项目](https://github.com/gitalk/gitalk/blob/master/readme-cn.md)
 
