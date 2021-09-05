@@ -1,8 +1,10 @@
 ---
-title: hexo博客
-date: 2021-09-03 07:19:43
+title: hexo博客搭建并实现github action自动部署
+date: 2021-09-02 07:19:43
 tags:
 - hexo
+- github action
+toc: true
 ---
 
 > Hexo 是一款基于Node.js的一个快速、简洁且高效的博客框架。Hexo 使用 Markdown（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页，你可以把生成的静态网页上传到 Web 服务器上，这里我们选用的是 GitHub 做 Web 服务器.
@@ -12,6 +14,14 @@ tags:
 
 
 # 1. 使用 docker 搭建 hexo 博客环境
+
+## 1.1 版本介绍
+
+- hexo: 5.4.0
+- hexo-cli: 4.3.0
+- node: 16.8.0
+
+## 1.2 部署
 
 ```bash
 mkdir /data/hexo -p && cd /data/hexo
@@ -29,6 +39,7 @@ sudo docker exec -it hexo /bin/bash
 cd /hexo
 
 # 安装 hexo
+npm install -g npm@7.21.0
 npm install -g hexo-cli
 # 新建站点
 hexo init blog-markdown
@@ -211,7 +222,7 @@ cp -a /opt/hexo/blog-markdown/* ./
 # 由于themes/yilia 不会提交, 所以要把一些配置 copy 出来
 mkdir -p themes_conf/yilia
 
-cp themes/yilia/_config.yml themes_config/yilia/
+cp themes/yilia/_config.yml themes_conf/yilia/
 
 # gitignore
 cat > ./.gitignore << EOF
@@ -237,7 +248,9 @@ touch .github/workflows/deploy.yml
 # 详见 附录.
 ```
 
-## 4.5 push 到 github
+
+
+## 4.5 push 到github
 
 ```bash
 git add .
@@ -245,6 +258,9 @@ git commit -m "my hexo blog first commit"
 git push --set-upstream origin source
 ```
 
+
+
+ 
 
 # 5. 附录
 
@@ -268,9 +284,12 @@ on:
 env:
   GIT_USER: yanglibin
   GIT_EMAIL: fengyuanyang000@qq.com
+  THEME: yilia
   THEME_REPO: litten/hexo-theme-yilia
   THEME_BRANCH: master
   THEME_PATH: themes/yilia
+  NODE_VERSION: 16.8.0
+
 
 # job
 jobs:
@@ -285,6 +304,7 @@ jobs:
         with:
           ref: source
 
+
       # Checkout 第三库: https://github.com/litten/hexo-theme-yilia.git 的 master 分支到  themes/yilia 目录.
       - name: Checkout theme repo
         uses: actions/checkout@v2
@@ -293,11 +313,11 @@ jobs:
           ref: ${{ env.THEME_BRANCH }}
           path: ${{ env.THEME_PATH }}
 
-      # 这里用的是 Node.js 14.x
+
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16.8.0'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
       # 配置环境
@@ -314,12 +334,16 @@ jobs:
           echo "$HEXO_DEPLOY_PRI" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan github.com >> ~/.ssh/known_hosts
-          # 配置 themes 
-          cp -af themes_config/yilia/* themes/yilia/
+          # 配置git name, email
+          git config --global user.name $GIT_USER
+          git config --global user.email $GIT_EMAIL
+          # theme
+          cp -af themes_config/${{env.THEME}}/*   ${{env.THEME_PATH}}/
 
       # 配置环境
       - name: install npm dependencies
-        run: npm install 
+        run: |
+          npm install 
         
       # 生成并部署
       - name: Deploy
