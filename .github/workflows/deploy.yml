@@ -1,0 +1,79 @@
+# action name
+name: Hexo Deploy
+
+# 触发action分支
+on:
+  push:
+    branches:
+      - source
+
+# 定义变量
+env:
+  GIT_USER: yanglibin
+  GIT_EMAIL: fengyuanyang000@qq.com
+  THEME: yilia
+  THEME_REPO: litten/hexo-theme-yilia
+  THEME_BRANCH: master
+  THEME_PATH: themes/yilia
+  NODE_VERSION: 16.8.0
+
+
+# job
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 使用 第三方 Actions  
+      # Checkout 当前仓库到本地
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: source
+
+
+      # Checkout 第三库: https://github.com/litten/hexo-theme-yilia.git 的 master 分支到  themes/yilia 目录.
+      - name: Checkout theme repo
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ env.THEME_REPO }}
+          ref: ${{ env.THEME_BRANCH }}
+          path: ${{ env.THEME_PATH }}
+
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      # 配置环境
+      - name: Configuration environment
+        env:
+          HEXO_DEPLOY_PRI: ${{secrets.HEXO_DEPLOY_PRI}}
+
+        run: |
+          # 配置时区
+          sudo timedatectl set-timezone "Asia/Shanghai"
+          # 配置ssh 免密
+          mkdir -p ~/.ssh/
+          chmod 700 ~/.ssh
+          echo "$HEXO_DEPLOY_PRI" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          # 配置git name, email
+          git config --global user.name $GIT_USER
+          git config --global user.email $GIT_EMAIL
+          # theme
+          cp -af themes_config/${{env.THEME}}/*   ${{env.THEME_PATH}}/
+
+      # 配置环境
+      - name: install npm dependencies
+        run: |
+          npm install 
+        
+      # 生成并部署
+      - name: Deploy
+        run: |
+          npx hexo deploy --generate
+
