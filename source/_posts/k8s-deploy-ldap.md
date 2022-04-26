@@ -4,7 +4,7 @@ date: 2021-09-16 17:21:03
 tags:
 - k8s
 - ldap
-- openldap
+- ldap
 - phpldapadmin
 - devops
 ---
@@ -24,6 +24,7 @@ tags:
 
 **创建namespace**:  `kubectl create ns ldap`
 
+<!-- more -->
 # 2. 创建secret 
 > 设置`organizatation`,`domain`,`password`,存储在`secret` 中。
 
