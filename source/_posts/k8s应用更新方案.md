@@ -1,5 +1,5 @@
 ---
-title: k8s中部署gitlab
+title: k8s中的应用更新方案
 date: 2021-11-18 11:23:23
 tags:
 - k8s
@@ -15,6 +15,7 @@ tags:
 
 **推荐使用`请求头 Header` 来区分流量 **
 
+<!-- more -->
 
 # 1. kubectl rollout
 
